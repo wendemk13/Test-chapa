@@ -4,22 +4,57 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chapa Payment</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 50px;
+        }
+        .hidden {
+            display: none;
+        }
+        .success {
+            color: green;
+            font-size: 24px;
+        }
+        .error {
+            color: red;
+            font-size: 24px;
+        }
+    </style>
 </head>
 <body>
 
-    <h2>Chapa Payment Test</h2>
-    <form id="paymentForm">
-        <label>Full Name:</label>
-        <input type="text" id="name" required><br><br>
+    <!-- Payment Form -->
+    <div id="payment-form">
+        <h2>Chapa Payment Test</h2>
+        <form id="paymentForm">
+            <label>Full Name:</label>
+            <input type="text" id="name" required><br><br>
 
-        <label>Email:</label>
-        <input type="email" id="email" required><br><br>
+            <label>Email:</label>
+            <input type="email" id="email" required><br><br>
 
-        <label>Amount (ETB):</label>
-        <input type="number" id="amount" required><br><br>
+            <label>Amount (ETB):</label>
+            <input type="number" id="amount" required><br><br>
 
-        <button type="button" onclick="processPayment()">Pay Now</button>
-    </form>
+            <button type="button" onclick="processPayment()">Pay Now</button>
+        </form>
+    </div>
+
+    <!-- Success Message -->
+    <div id="success-message" class="hidden">
+        <h1 class="success">Payment Successful!</h1>
+        <p>Thank you for your payment. Your transaction was completed successfully.</p>
+        <a href="index.html">Go Back to Home</a>
+    </div>
+
+    <!-- Fallback Message -->
+    <div id="fallback-message" class="hidden">
+        <h1 class="error">Payment Failed!</h1>
+        <p>Something went wrong, or you canceled the payment.</p>
+        <a href="index.html">Try Again</a>
+    </div>
 
     <script>
         function processPayment() {
@@ -29,14 +64,28 @@
             const email = document.getElementById("email").value;
 
             const public_key = "YOUR_PUBLIC_KEY"; // Replace with your Chapa public key
-            const return_url = "https://yourdomain.com/payment-success";
-            const fallback_url = "https://yourdomain.com/payment-fallback";
+            const return_url = window.location.href + "?status=success";
+            const fallback_url = window.location.href + "?status=failure";
 
             const chapaUrl = `https://api.chapa.co/v1/hosted/pay?public_key=${public_key}&tx_ref=${tx_ref}&amount=${amount}&currency=ETB&email=${email}&first_name=${name}&return_url=${return_url}&fallback_url=${fallback_url}`;
 
             // Redirect user to Chapa payment page
             window.location.href = chapaUrl;
         }
+
+        // Handle Payment Status on Return
+        window.onload = function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const status = urlParams.get("status");
+
+            if (status === "success") {
+                document.getElementById("payment-form").style.display = "none";
+                document.getElementById("success-message").classList.remove("hidden");
+            } else if (status === "failure") {
+                document.getElementById("payment-form").style.display = "none";
+                document.getElementById("fallback-message").classList.remove("hidden");
+            }
+        };
     </script>
 
 </body>
